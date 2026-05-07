@@ -81,10 +81,10 @@ export default function AppLayout() {
   const handleDownloadUpdate = () => window.api.openUpdatePage()
 
   return (
-    <div className="h-screen min-h-0 flex overflow-hidden bg-slate-50 print:block print:h-auto print:overflow-visible print:bg-white">
+    <div className="h-screen w-screen flex overflow-hidden bg-slate-50 print:block print:h-auto print:overflow-visible print:bg-white">
 
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
-      <aside className="w-72 min-h-0 flex-shrink-0 bg-slate-900 flex flex-col no-print">
+      <aside className="w-72 flex-shrink-0 bg-slate-900 no-print" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', height: '100vh' }}>
 
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-700/60">
@@ -122,8 +122,8 @@ export default function AppLayout() {
           </div>
         </div>
 
-        {/* Client list */}
-        <div className="min-h-0 flex-1 overflow-y-auto py-2">
+        {/* Client list scrollable area */}
+        <div className="overflow-y-auto py-2">
           <p className="text-slate-500 text-xs font-medium uppercase tracking-wider px-4 py-1.5">
             Clients {filtered.length > 0 && `· ${filtered.length}`}
           </p>
@@ -186,7 +186,7 @@ export default function AppLayout() {
         </div>
 
         {/* Bottom actions */}
-        <div className="p-3 border-t border-slate-700/60 space-y-1.5">
+        <div className="flex-shrink-0 p-3 border-t border-slate-700/60 space-y-1.5">
           {/* Update banner */}
           {updateAvailable && (
             <div className="px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 space-y-2">
