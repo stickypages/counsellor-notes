@@ -11,14 +11,17 @@ const source = process.env.APP_ICON_SOURCE
 
 const outDir = path.resolve(root, 'build/icons')
 const iconsetDir = path.resolve(outDir, 'icon.iconset')
+const shouldGenerateIcns = process.platform === 'darwin'
 
 if (!fs.existsSync(source)) {
   throw new Error(`Icon source not found: ${source}`)
 }
 
 fs.mkdirSync(outDir, { recursive: true })
-fs.rmSync(iconsetDir, { recursive: true, force: true })
-fs.mkdirSync(iconsetDir, { recursive: true })
+if (shouldGenerateIcns) {
+  fs.rmSync(iconsetDir, { recursive: true, force: true })
+  fs.mkdirSync(iconsetDir, { recursive: true })
+}
 
 const sizes = [16, 32, 64, 128, 256, 512, 1024]
 
@@ -40,12 +43,14 @@ const iconsetMap = [
   [1024, 'icon_512x512@2x.png'],
 ]
 
-for (const [size, fileName] of iconsetMap) {
-  fs.copyFileSync(path.join(outDir, `icon-${size}.png`), path.join(iconsetDir, fileName))
-}
+if (shouldGenerateIcns) {
+  for (const [size, fileName] of iconsetMap) {
+    fs.copyFileSync(path.join(outDir, `icon-${size}.png`), path.join(iconsetDir, fileName))
+  }
 
-const icnsPath = path.join(outDir, 'icon.icns')
-execFileSync('iconutil', ['-c', 'icns', iconsetDir, '-o', icnsPath])
+  const icnsPath = path.join(outDir, 'icon.icns')
+  execFileSync('iconutil', ['-c', 'icns', iconsetDir, '-o', icnsPath])
+}
 
 const icoBuffer = await pngToIco([
   path.join(outDir, 'icon-256.png'),
@@ -56,5 +61,7 @@ const icoBuffer = await pngToIco([
 ])
 fs.writeFileSync(path.join(outDir, 'icon.ico'), icoBuffer)
 
-fs.rmSync(iconsetDir, { recursive: true, force: true })
+if (shouldGenerateIcns) {
+  fs.rmSync(iconsetDir, { recursive: true, force: true })
+}
 console.log('Generated app icons in build/icons')
