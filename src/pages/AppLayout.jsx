@@ -21,7 +21,6 @@ export default function AppLayout() {
   const [pinError, setPinError] = useState('')
   const [version, setVersion] = useState('')
   const [updateAvailable, setUpdateAvailable] = useState(false)
-  const [updateReady, setUpdateReady] = useState(false)
   const [showBranding, setShowBranding] = useState(false)
   const [branding, setBranding] = useState({ businessName: 'Counsellor Notes', logoDataUrl: '' })
 
@@ -38,8 +37,9 @@ export default function AppLayout() {
         if (data) setBranding(data)
       })
     }
-    window.api.onUpdateAvailable(() => setUpdateAvailable(true))
-    window.api.onUpdateDownloaded(() => setUpdateReady(true))
+    window.api.onUpdateAvailable(() => {
+      setUpdateAvailable(true)
+    })
   }, [loadClients])
 
   const filtered = clients.filter((c) =>
@@ -77,6 +77,8 @@ export default function AppLayout() {
       navigate('/app')
     }
   }
+
+  const handleDownloadUpdate = () => window.api.openUpdatePage()
 
   return (
     <div className="h-screen min-h-0 flex overflow-hidden bg-slate-50 print:block print:h-auto print:overflow-visible print:bg-white">
@@ -186,20 +188,18 @@ export default function AppLayout() {
         {/* Bottom actions */}
         <div className="p-3 border-t border-slate-700/60 space-y-1.5">
           {/* Update banner */}
-          {updateReady && (
-            <button
-              onClick={() => window.api.installUpdate()}
-              className="w-full flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-500
-                         text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              <RefreshCw size={14} />
-              Install Update & Restart
-            </button>
-          )}
-          {updateAvailable && !updateReady && (
-            <div className="flex items-center gap-2 px-3 py-2 text-yellow-400 text-xs">
-              <RefreshCw size={13} className="animate-spin" />
-              Downloading update…
+          {updateAvailable && (
+            <div className="px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 space-y-2">
+              <div className="flex items-center gap-2 text-amber-300 text-xs font-medium">
+                <RefreshCw size={13} />
+                An update is available.
+              </div>
+              <button
+                onClick={handleDownloadUpdate}
+                className="w-full px-3 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold rounded-lg transition-colors"
+              >
+                Download Update
+              </button>
             </div>
           )}
 

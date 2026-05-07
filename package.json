@@ -7,9 +7,16 @@
     "dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
     "generate:icons": "node scripts/generate-icons.mjs",
-    "dist": "npm run generate:icons && vite build && electron-builder",
-    "dist:mac": "npm run generate:icons && vite build && electron-builder --mac",
-    "dist:win": "npm run generate:icons && vite build && electron-builder --win"
+    "dist": "npm run generate:icons && vite build && electron-builder --publish never",
+    "dist:mac": "npm run generate:icons && vite build && electron-builder --mac --publish never",
+    "dist:win": "npm run generate:icons && vite build && electron-builder --win --publish never",
+    "release": "npm run generate:icons && vite build && electron-builder --publish always",
+    "release:mac": "npm run generate:icons && vite build && electron-builder --mac --publish always",
+    "release:win": "npm run generate:icons && vite build && electron-builder --win --publish always"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stickypages/counsellor-notes.git"
   },
   "dependencies": {
     "@tiptap/extension-placeholder": "^2.3.0",

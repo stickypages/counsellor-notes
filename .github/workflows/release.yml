@@ -1,27 +1,68 @@
-name: Build Installers
+name: Build Releases
 
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      publish_release: ${{ steps.release.outputs.publish_release }}
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Decide whether to publish
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "publish_release=false" >> "$GITHUB_OUTPUT"
+            echo "Release $tag already exists; skipping publish."
+            exit 0
+          fi
+
+          gh release create "$tag" \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Counsellor Notes v$version" \
+            --notes "Automated release for version $version."
+
+          echo "publish_release=true" >> "$GITHUB_OUTPUT"
+
   build-installers:
+    needs: prepare-release
+    if: needs.prepare-release.outputs.publish_release == 'true'
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-latest
             platform: mac
-            builder_args: --mac
+            release_script: release:mac
             artifact_name: installers-mac
           - os: windows-latest
             platform: windows
-            builder_args: --win
+            release_script: release:win
             artifact_name: installers-windows
 
     runs-on: ${{ matrix.os }}
@@ -42,7 +83,8 @@ jobs:
       - name: Build app and installers
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: npm run generate:icons && npm run build && npx electron-builder ${{ matrix.builder_args }} --publish never
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run ${{ matrix.release_script }}
 
       - name: Upload installer artifacts
         uses: actions/upload-artifact@v4

@@ -1,9 +1,18 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron')
 const path = require('path')
 const { autoUpdater } = require('electron-updater')
 const db = require('./db')
+const packageJson = require('../package.json')
 
 let mainWindow
+
+function getReleasePageUrl() {
+  const publishConfig = packageJson?.build?.publish
+  const githubPublish = Array.isArray(publishConfig) ? publishConfig[0] : publishConfig
+  const owner = githubPublish?.owner || 'stickypages'
+  const repo = githubPublish?.repo || packageJson?.name || 'counsellor-notes'
+  return `https://github.com/${owner}/${repo}/releases/latest`
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -33,10 +42,12 @@ app.whenReady().then(async () => {
   const dbPath = path.join(app.getPath('userData'), 'counsellor-notes.db')
   await db.initialize(dbPath)
 
+  autoUpdater.autoDownload = false
+
   createWindow()
 
   if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify()
+    autoUpdater.checkForUpdates()
   }
 
   app.on('activate', () => {
@@ -108,9 +119,7 @@ ipcMain.handle('app:setBranding', (_e, payload) => db.setBranding(payload))
 autoUpdater.on('update-available', () => {
   mainWindow?.webContents.send('update:available')
 })
-autoUpdater.on('update-downloaded', () => {
-  mainWindow?.webContents.send('update:downloaded')
-})
-ipcMain.handle('update:install', () => {
-  autoUpdater.quitAndInstall()
+ipcMain.handle('update:openReleasePage', async () => {
+  await shell.openExternal(getReleasePageUrl())
+  return { success: true }
 })

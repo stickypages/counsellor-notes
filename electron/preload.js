@@ -31,6 +31,5 @@ contextBridge.exposeInMainWorld('api', {
     setBranding: (payload) => ipcRenderer.invoke('app:setBranding', payload),
   },
   onUpdateAvailable: (cb) => ipcRenderer.on('update:available', cb),
-  onUpdateDownloaded: (cb) => ipcRenderer.on('update:downloaded', cb),
-  installUpdate: () => ipcRenderer.invoke('update:install'),
+  openUpdatePage: () => ipcRenderer.invoke('update:openReleasePage'),
 })

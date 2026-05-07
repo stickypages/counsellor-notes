@@ -82,6 +82,8 @@ APP_ICON_SOURCE=path/to/your-logo.png npm run generate:icons
 
 ## Build Distributables
 
+These commands build installers only. They do not publish to GitHub Releases.
+
 Build both:
 
 ```bash
@@ -104,25 +106,39 @@ Output folder:
 
 - `release/`
 
+To publish installers to the configured GitHub release target, use:
+
+```bash
+npm run release
+npm run release:mac
+npm run release:win
+```
+
 ## GitHub Releases + Auto Updates
 
 This project includes:
 
 - Electron publish config in `package.json`
 - GitHub Actions release workflow at `.github/workflows/release.yml`
+- In-app update prompt with a `Download Update` button that opens the latest GitHub Release
 
 ### How releases are created
 
-1. Commit and push code to GitHub
-2. Create and push a tag like `v1.0.0`
-3. GitHub Actions builds Mac + Windows installers
-4. electron-builder publishes assets to that GitHub Release
+1. Update `version` in `package.json`
+2. Commit and push to `main`
+3. GitHub Actions creates a GitHub Release `v<version>` if it does not already exist
+4. electron-builder uploads the installers plus update metadata files to that release
+5. Installed apps on an older version will see an update prompt on launch
+6. Clicking `Download Update` opens the latest release page for manual install
 
-### Commands to tag a release
+Auto-update only works when the app version increases. Pushing code without changing the version will not create a newer update.
+
+### Local publish commands
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+npm run release
+npm run release:mac
+npm run release:win
 ```
 
 ## Security Notes
@@ -137,6 +153,8 @@ git push origin v1.0.0
 npm run dev
 npm run build
 npm run generate:icons
+npm run dist
 npm run dist:mac
 npm run dist:win
+npm run release
 ```
