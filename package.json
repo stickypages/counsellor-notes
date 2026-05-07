@@ -71,8 +71,8 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "justingiesbrecht",
-      "repo": "NotesSession",
+      "owner": "stickypages",
+      "repo": "counsellor-notes",
       "releaseType": "release"
     }
   }

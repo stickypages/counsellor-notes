@@ -1,23 +1,28 @@
-name: Build and Release
+name: Build Installers
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*.*.*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  build-installers:
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-latest
-            args: --mac
+            platform: mac
+            builder_args: --mac
+            artifact_name: installers-mac
           - os: windows-latest
-            args: --win
+            platform: windows
+            builder_args: --win
+            artifact_name: installers-windows
 
     runs-on: ${{ matrix.os }}
 
@@ -34,7 +39,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and publish
+      - name: Build app and installers
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run generate:icons && npm run build && npx electron-builder ${{ matrix.args }} --publish always
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npm run generate:icons && npm run build && npx electron-builder ${{ matrix.builder_args }} --publish never
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: release/*
+          if-no-files-found: error
