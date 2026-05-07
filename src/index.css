@@ -22,44 +22,51 @@
 
 /* ── Tiptap Editor ─────────────────────────────────────────────────────────── */
 
-.tiptap-editor .ProseMirror {
-  @apply outline-none min-h-[120px];
+.tiptap-editor.ProseMirror {
+  @apply min-h-[120px];
   user-select: text;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.tiptap-editor .ProseMirror > * + * {
+.tiptap-editor.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tiptap-editor.ProseMirror > * + * {
   margin-top: 0.5rem;
 }
 
-.tiptap-editor .ProseMirror p {
+.tiptap-editor.ProseMirror p {
   @apply leading-relaxed;
 }
 
-.tiptap-editor .ProseMirror h1 {
+.tiptap-editor.ProseMirror h1 {
   @apply text-xl font-bold text-slate-900 mt-3 mb-1;
 }
 
-.tiptap-editor .ProseMirror h2 {
+.tiptap-editor.ProseMirror h2 {
   @apply text-lg font-semibold text-slate-900 mt-3 mb-1;
 }
 
-.tiptap-editor .ProseMirror ul {
+.tiptap-editor.ProseMirror ul {
   @apply list-disc pl-5 space-y-0.5;
 }
 
-.tiptap-editor .ProseMirror ol {
+.tiptap-editor.ProseMirror ol {
   @apply list-decimal pl-5 space-y-0.5;
 }
 
-.tiptap-editor .ProseMirror strong {
+.tiptap-editor.ProseMirror strong {
   @apply font-semibold;
 }
 
-.tiptap-editor .ProseMirror em {
+.tiptap-editor.ProseMirror em {
   @apply italic;
 }
 
-.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+.tiptap-editor.ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   @apply text-slate-400 pointer-events-none float-left h-0;
 }

@@ -18,9 +18,11 @@ export default function Login() {
     window.api.auth.isSetup().then((isSetup) => {
       setMode(isSetup ? 'login' : 'setup')
     })
-    window.api.app.getBranding().then((data) => {
-      if (data) setBranding(data)
-    })
+    if (typeof window.api?.app?.getBranding === 'function') {
+      window.api.app.getBranding().then((data) => {
+        if (data) setBranding(data)
+      })
+    }
   }, [])
 
   const handleLogin = async (e) => {

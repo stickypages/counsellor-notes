@@ -1,9 +1,12 @@
 import { useEditor, EditorContent } from '@tiptap/react'
+import { useEffect, useRef } from 'react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Bold, Italic, Heading1, Heading2, List, ListOrdered } from 'lucide-react'
 
 export default function RichEditor({ value, onChange, placeholder }) {
+  const isApplyingExternalChange = useRef(false)
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false, code: false, blockquote: false, horizontalRule: false }),
@@ -14,9 +17,21 @@ export default function RichEditor({ value, onChange, placeholder }) {
       attributes: { class: 'tiptap-editor' },
     },
     onUpdate({ editor }) {
+      if (isApplyingExternalChange.current) return
       onChange?.(editor.getHTML())
     },
   })
+
+  useEffect(() => {
+    if (!editor) return
+    const incoming = value || ''
+    const current = editor.getHTML()
+    if (incoming === current) return
+
+    isApplyingExternalChange.current = true
+    editor.commands.setContent(incoming, { emitUpdate: false })
+    isApplyingExternalChange.current = false
+  }, [editor, value])
 
   if (!editor) return null
 

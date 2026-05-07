@@ -92,11 +92,25 @@ function createTables() {
       session_notes  TEXT DEFAULT '',
       outcomes       TEXT DEFAULT '',
       next_topics    TEXT DEFAULT '',
+      outcomes_list  TEXT DEFAULT '[]',
+      goals_list     TEXT DEFAULT '[]',
       created_at     TEXT DEFAULT (datetime('now')),
       updated_at     TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
     );
   `)
+
+  ensureSessionColumns()
+}
+
+function ensureSessionColumns() {
+  const cols = rows('PRAGMA table_info(sessions)').map((c) => c.name)
+  if (!cols.includes('outcomes_list')) {
+    db.run("ALTER TABLE sessions ADD COLUMN outcomes_list TEXT DEFAULT '[]'")
+  }
+  if (!cols.includes('goals_list')) {
+    db.run("ALTER TABLE sessions ADD COLUMN goals_list TEXT DEFAULT '[]'")
+  }
 }
 
 // ── Crypto helpers ────────────────────────────────────────────────────────────
@@ -199,19 +213,35 @@ function getSession(id) {
 }
 
 function createSession(data) {
-  const { client_id, date, session_notes, outcomes, next_topics } = data
+  const { client_id, date, session_notes, outcomes, next_topics, outcomes_list, goals_list } = data
   const newId = exec(
-    'INSERT INTO sessions (client_id, date, session_notes, outcomes, next_topics) VALUES (?, ?, ?, ?, ?)',
-    [client_id, date, session_notes || '', outcomes || '', next_topics || '']
+    'INSERT INTO sessions (client_id, date, session_notes, outcomes, next_topics, outcomes_list, goals_list) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [
+      client_id,
+      date,
+      session_notes || '',
+      outcomes || '',
+      next_topics || '',
+      outcomes_list || '[]',
+      goals_list || '[]',
+    ]
   )
   return getSession(newId)
 }
 
 function updateSession(id, data) {
-  const { date, session_notes, outcomes, next_topics } = data
+  const { date, session_notes, outcomes, next_topics, outcomes_list, goals_list } = data
   exec(
-    "UPDATE sessions SET date=?, session_notes=?, outcomes=?, next_topics=?, updated_at=datetime('now') WHERE id=?",
-    [date, session_notes || '', outcomes || '', next_topics || '', id]
+    "UPDATE sessions SET date=?, session_notes=?, outcomes=?, next_topics=?, outcomes_list=?, goals_list=?, updated_at=datetime('now') WHERE id=?",
+    [
+      date,
+      session_notes || '',
+      outcomes || '',
+      next_topics || '',
+      outcomes_list || '[]',
+      goals_list || '[]',
+      id,
+    ]
   )
   return getSession(id)
 }

@@ -33,9 +33,11 @@ export default function AppLayout() {
   useEffect(() => {
     loadClients()
     window.api.app.getVersion().then(setVersion)
-    window.api.app.getBranding().then((data) => {
-      if (data) setBranding(data)
-    })
+    if (typeof window.api?.app?.getBranding === 'function') {
+      window.api.app.getBranding().then((data) => {
+        if (data) setBranding(data)
+      })
+    }
     window.api.onUpdateAvailable(() => setUpdateAvailable(true))
     window.api.onUpdateDownloaded(() => setUpdateReady(true))
   }, [loadClients])
@@ -77,10 +79,10 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-slate-50">
+    <div className="h-screen min-h-0 flex overflow-hidden bg-slate-50 print:block print:h-auto print:overflow-visible print:bg-white">
 
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
-      <aside className="w-72 flex-shrink-0 bg-slate-900 flex flex-col">
+      <aside className="w-72 min-h-0 flex-shrink-0 bg-slate-900 flex flex-col no-print">
 
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-700/60">
@@ -119,7 +121,7 @@ export default function AppLayout() {
         </div>
 
         {/* Client list */}
-        <div className="flex-1 overflow-y-auto py-2">
+        <div className="min-h-0 flex-1 overflow-y-auto py-2">
           <p className="text-slate-500 text-xs font-medium uppercase tracking-wider px-4 py-1.5">
             Clients {filtered.length > 0 && `· ${filtered.length}`}
           </p>
@@ -243,7 +245,7 @@ export default function AppLayout() {
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto flex flex-col">
+      <main className="min-h-0 flex-1 overflow-y-auto flex flex-col print:w-full print:overflow-visible print:block">
         <Outlet context={{ reloadClients: loadClients }} />
       </main>
 
@@ -328,6 +330,10 @@ function BrandingModal({ branding, onClose, onSaved }) {
 
   const save = async (e) => {
     e.preventDefault()
+    if (typeof window.api?.app?.setBranding !== 'function') {
+      setError('Please restart the app to use branding settings.')
+      return
+    }
     const updated = await window.api.app.setBranding({
       businessName: businessName.trim() || 'Counsellor Notes',
       logoDataUrl,
