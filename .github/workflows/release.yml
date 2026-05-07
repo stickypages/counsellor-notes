@@ -10,58 +10,40 @@ permissions:
   contents: write
 
 jobs:
-  prepare-release:
+  check-version:
     runs-on: ubuntu-latest
     outputs:
-      publish_release: ${{ steps.release.outputs.publish_release }}
-      version: ${{ steps.release.outputs.version }}
+      should_build: ${{ steps.check.outputs.should_build }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Decide whether to publish
-        id: release
+      - name: Check if version already released
+        id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           version=$(node -p "require('./package.json').version")
           tag="v$version"
-
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
           if gh release view "$tag" >/dev/null 2>&1; then
-            echo "publish_release=false" >> "$GITHUB_OUTPUT"
-            echo "Release $tag already exists; skipping publish."
-            exit 0
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            echo "Release $tag already exists; skipping."
+          else
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
           fi
 
-          gh release create "$tag" \
-            --repo "${{ github.repository }}" \
-            --target "${{ github.sha }}" \
-            --title "Counsellor Notes v$version" \
-            --notes "Automated release for version $version."
-
-          echo "publish_release=true" >> "$GITHUB_OUTPUT"
-
   build-installers:
-    needs: prepare-release
-    if: needs.prepare-release.outputs.publish_release == 'true'
+    needs: check-version
+    if: needs.check-version.outputs.should_build == 'true'
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-latest
-            platform: mac
             release_script: release:mac
             artifact_name: installers-mac
           - os: windows-latest
-            platform: windows
             release_script: release:win
             artifact_name: installers-windows
 
@@ -80,10 +62,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build app and installers
+      - name: Build and publish
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run ${{ matrix.release_script }}
 
       - name: Upload installer artifacts

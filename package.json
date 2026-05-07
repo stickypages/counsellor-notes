@@ -1,6 +1,6 @@
 {
   "name": "counsellor-notes",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Secure private session notes for counsellors",
   "main": "electron/main.js",
   "scripts": {
@@ -80,7 +80,7 @@
       "provider": "github",
       "owner": "stickypages",
       "repo": "counsellor-notes",
-      "releaseType": "release"
+      "releaseType": "draft"
     }
   }
 }
