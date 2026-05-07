@@ -1,6 +1,6 @@
 {
   "name": "counsellor-notes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Secure private session notes for counsellors",
   "main": "electron/main.js",
   "scripts": {
