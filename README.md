@@ -158,3 +158,8 @@ npm run dist:mac
 npm run dist:win
 npm run release
 ```
+
+## Run to get out of quarintine
+```bash
+xattr -d com.apple.quarantine /Applications/Counsellor\ Notes.app
+```

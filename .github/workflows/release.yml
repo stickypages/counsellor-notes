@@ -74,3 +74,19 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: release/*
           if-no-files-found: error
+
+  publish-release:
+    needs: build-installers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          gh release edit "$tag" --draft=false --repo "${{ github.repository }}"
